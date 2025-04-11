@@ -1,0 +1,75 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "l3Networks_name": {
+          "type": "string"
+      },
+      "cloudServicesNetworks_name": {
+          "type": "string"
+      },
+      "l3IsolationDomains_name": {
+          "type": "string"
+      },
+      "clusterCustomLocation": {
+        "type": "string"
+      },
+      "vlanId": {
+        "type": "int"
+      },
+      "ipv4Prefix": {
+        "type": "string"
+      },
+      "ipv6Prefix": {
+        "type": "string"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.NetworkCloud/cloudServicesNetworks",
+          "apiVersion": "2025-02-01",
+          "name": "[parameters('cloudServicesNetworks_name')]",
+          "location": "uksouth",
+          "extendedLocation": {
+              "type": "CustomLocation",
+              "name": "[parameters('clusterCustomLocation')]"
+          },
+          "tags": {},
+          "properties": {
+              "additionalEgressEndpoints": [
+                  {
+                      "category": "customer-provided",
+                      "endpoints": [
+                          {
+                              "domainName": ".azurecr.io",
+                              "port": 443
+                          }
+                      ]
+                  }
+              ],
+              "enableDefaultEgressEndpoints": "True"
+          }
+      },
+      {
+          "type": "Microsoft.NetworkCloud/l3Networks",
+          "apiVersion": "2025-02-01",
+          "name": "[parameters('l3Networks_name')]",
+          "location": "uksouth",
+          "extendedLocation": {
+              "type": "CustomLocation",
+              "name": "[parameters('clusterCustomLocation')]"
+          },
+          "tags": {},
+          "properties": {
+              "interfaceName": "[concat('vlan-', parameters('vlanId'))]",
+              "l3IsolationDomainId": "[resourceId('Microsoft.ManagedNetworkFabric/l3IsolationDomains', parameters('l3IsolationDomains_name'))]",
+              "ipAllocationType": "DualStack",
+              "ipv4ConnectedPrefix": "[parameters('ipv4Prefix')]",
+              "ipv6ConnectedPrefix": "[parameters('ipv6Prefix')]",
+              "vlan": "[parameters('vlanId')]"
+          }
+      }
+
+  ]
+}
