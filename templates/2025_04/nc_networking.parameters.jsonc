@@ -1,0 +1,27 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "l3Networks_name": { // Provide a name for the internal network
+            "value": ""
+        },
+        "cloudServicesNetworks_name": { // Provide a name for the cloud services network
+            "value": ""
+        },
+        "l3IsolationDomains_name": {  // Provide the name of the fabric isolation domain that contains the internal network that will correspond with this network
+            "value": ""
+        },
+        "clusterCustomLocation": {  // Provide the custom location for this instance
+            "value": ""
+        },
+        "vlanId": { // Provide the vlan ID, ipV4 and ipV6 prefixes that correspond with the internal network on the isolation domain
+            "value": 9999
+          },
+          "ipv4Prefix": {
+            "value": ""
+          },
+          "ipv6Prefix": {
+            "value": ""
+          }
+    }
+  }

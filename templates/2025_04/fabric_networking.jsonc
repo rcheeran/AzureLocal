@@ -1,0 +1,100 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "l3IsolationDomain_name": {
+          "type": "string"
+      },
+      "networkFabrics_id": {
+          "type": "string"
+      },
+      "external_Uplink_name": {
+        "type": "string"
+      },
+      "optionBProperties": {
+        "type": "object"
+      },
+      "l3InternalNetwork_name": {
+        "type": "string"
+      },
+      "peerASN": {
+        "type": "int"
+      },
+      "vlanId": {
+        "type": "int"
+      },
+      "ipv4Prefix": {
+        "type": "string"
+      },
+      "ipv6Prefix": {
+        "type": "string"
+      }
+  },
+  "variables": {},
+  "resources": [
+      {
+          "type": "Microsoft.ManagedNetworkFabric/l3IsolationDomains",
+          "apiVersion": "2023-06-15",
+          "name": "[parameters('l3IsolationDomain_name')]",
+          "location": "uksouth",
+          "properties": {
+              "redistributeConnectedSubnets": "True",
+              "redistributeStaticRoutes": "True",
+              "networkFabricId": "[parameters('networkFabrics_id')]"
+          }
+      },
+      {
+          "type": "Microsoft.ManagedNetworkFabric/l3IsolationDomains/externalNetworks",
+          "apiVersion": "2023-06-15",
+          "name": "[concat(parameters('l3IsolationDomain_name'),'/', parameters('external_Uplink_name'))]",
+          "dependsOn": [
+              "[resourceId('Microsoft.ManagedNetworkFabric/l3IsolationDomains', parameters('l3IsolationDomain_name'))]"
+          ],
+          "properties": {
+              "peeringOption": "OptionB",
+                "optionBProperties": "[parameters('optionBProperties')]"
+
+        
+          }
+      },
+      {
+          "type": "Microsoft.ManagedNetworkFabric/l3IsolationDomains/internalNetworks",
+          "apiVersion": "2023-06-15",
+          "name": "[concat(parameters('l3IsolationDomain_name'),'/', parameters('l3InternalNetwork_name'))]",
+          "dependsOn": [
+              "[resourceId('Microsoft.ManagedNetworkFabric/l3IsolationDomains', parameters('l3IsolationDomain_name'))]"
+          ],
+          "properties": {
+              "vlanId": "[parameters('vlanId')]",
+              "mtu": 9000,
+              "connectedIPv4Subnets": [
+                  {
+                      "prefix": "[parameters('ipv4Prefix')]"
+                  }
+              ],
+              "connectedIPv6Subnets": [
+                  {
+                      "prefix": "[parameters('ipv6Prefix')]"
+                  }
+              ],
+              "bgpConfiguration": {
+                  "defaultRouteOriginate": "True",
+                  "allowAS": 2,
+                  "allowASOverride": "Unknown",
+                  "peerASN": "[parameters('peerASN')]",
+                  "ipv4ListenRangePrefixes": [
+                      "[parameters('ipv4Prefix')]"
+                  ],
+                  "ipv6ListenRangePrefixes": [
+                      "[parameters('ipv6Prefix')]"
+                  ]
+              },
+              "isMonitoringEnabled": "False",
+              "extension": "NoExtension"
+          }
+      }
+
+
+
+  ]
+}
